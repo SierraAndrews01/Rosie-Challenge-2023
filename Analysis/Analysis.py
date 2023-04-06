@@ -3,6 +3,8 @@ import patsy
 import statsmodels.api as sm
 from sklearn.model_selection import train_test_split
 import numpy as np
+from sklearn.model_selection import KFold
+from sklearn.metrics import r2_score
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
@@ -17,23 +19,26 @@ selectStaticVisc = staticViscDataframe[['cP', 'T', 'ALogP', 'ALogP2', 'AMR']].co
 # grouping relevant data together
 finalDataDF = selectStaticVisc.copy()
 density = selectStaticDen['Density'].to_list()
-finalDataDF['Density'] = density
+finalDataDF['Density'] = pd.Series(density)
+
+print(finalDataDF)
 
 # Helper functions
 def norm(x):
     return (x - train_stats['mean']) / train_stats['std']
 def format_output(data):
-    y1 = data.pop('PRICE')
+    y1 = data.pop('Density')
     y1 = np.array(y1)
-    y2 = data.pop('PTRATIO')
+    y2 = data.pop('cP')
     y2 = np.array(y2)
     return y1, y2
 
 # splitting data
-train, test = train_test_split(selectStaticDen, test_size=0.2, random_state=1)
+train, test = train_test_split(finalDataDF, test_size=0.2, random_state=1)
 train, val = train_test_split(train, test_size=0.2, random_state=1)
 
 train_stats = train.describe()
+print(train_stats)
 train_stats.pop('Density')
 train_stats.pop('cP')
 train_stats = train_stats.transpose()
@@ -45,3 +50,10 @@ val_Y = format_output(val)
 norm_train_X = np.array(norm(train))
 norm_test_X = np.array(norm(test))
 norm_val_X = np.array(norm(val))
+
+#Analysis
+r2 = r2_score(finalDataDF['Density'], finalDataDF['cP'])
+print(r2)
+
+
+
