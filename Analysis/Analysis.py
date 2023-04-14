@@ -5,9 +5,10 @@ from sklearn.model_selection import train_test_split
 import numpy as np
 from sklearn.model_selection import KFold
 from sklearn.metrics import r2_score
+from sklearn.metrics import mean_squared_error
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras import layers
+#from tensorflow.keras import layers
 
 xls = pd.ExcelFile('API_ProjectAll_SI.xlsx')
 staticDenDataframe = pd.read_excel(xls, 'staticDen')
@@ -54,6 +55,9 @@ norm_val_X = np.array(norm(val))
 #Analysis
 r2 = r2_score(finalDataDF['Density'], finalDataDF['cP'])
 print(r2)
+
+##rmse = mean_squared_error(test_Y, train_Y, squared = False)
+##print(rmse)
 
 
 
