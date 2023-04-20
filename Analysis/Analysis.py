@@ -17,10 +17,17 @@ staticViscDataframe = pd.read_excel(xls, 'staticVisc')
 selectStaticDen = staticDenDataframe[['Density', 'T', 'ALogP', 'ALogP2', 'AMR']].copy()
 selectStaticVisc = staticViscDataframe[['cP', 'T', 'ALogP', 'ALogP2', 'AMR']].copy()
 
+# set index to be temperature
+selectStaticVisc.set_index(['T', 'ALogP', 'ALogP2', 'AMR'], inplace=True)
+print(len(selectStaticVisc))
+selectStaticDen.set_index(['T', 'ALogP', 'ALogP2', 'AMR'], inplace=True)
+print(len(staticDenDataframe))
+
 # grouping relevant data together
-finalDataDF = selectStaticVisc.copy()
-density = selectStaticDen['Density'].to_list()
-finalDataDF['Density'] = pd.Series(density)
+finalDataDF = selectStaticVisc.join(selectStaticDen)
+#finalDataDF.dropna(0, inplace=True)
+# density = selectStaticDen['Density'].to_list()
+# finalDataDF['Density'] = pd.Series(density)
 
 print(finalDataDF)
 
@@ -53,11 +60,19 @@ norm_test_X = np.array(norm(test))
 norm_val_X = np.array(norm(val))
 
 #Analysis
-r2 = r2_score(finalDataDF['Density'], finalDataDF['cP'])
-print(r2)
+#finalDataDF = finalDataDF.reset_index()
+#r2 = r2_score(finalDataDF['Density'], finalDataDF['cP'])
+#print(r2)
 
 ##rmse = mean_squared_error(test_Y, train_Y, squared = False)
 ##print(rmse)
+
+
+#from sklearn.inspection import plot_partial_dependence
+# PD Plots
+#plot_partial_dependence(model, X, [feature_name])
+
+
 
 
 
