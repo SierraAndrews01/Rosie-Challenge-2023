@@ -6,9 +6,15 @@ import numpy as np
 from sklearn.model_selection import KFold
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
+import sklearn.inspection as skl
 import tensorflow as tf
 from tensorflow import keras
 #from tensorflow.keras import layers
+from keras import layers
+from sklearn.ensemble import RandomForestRegressor
+from mpl_toolkits import mplot3d
+import matplotlib.pyplot as plt
+import pdpbox
 
 xls = pd.ExcelFile('API_ProjectAll_SI.xlsx')
 staticDenDataframe = pd.read_excel(xls, 'staticDen')
@@ -25,10 +31,9 @@ print(len(staticDenDataframe))
 
 # grouping relevant data together
 finalDataDF = selectStaticVisc.join(selectStaticDen)
-#finalDataDF.dropna(0, inplace=True)
-# density = selectStaticDen['Density'].to_list()
-# finalDataDF['Density'] = pd.Series(density)
-
+finalDataDF = finalDataDF.dropna()
+finalDataDF = finalDataDF.reset_index()
+print(len(finalDataDF))
 print(finalDataDF)
 
 # Helper functions
@@ -67,12 +72,52 @@ norm_val_X = np.array(norm(val))
 ##rmse = mean_squared_error(test_Y, train_Y, squared = False)
 ##print(rmse)
 
+# print shape of input data
+print(norm_train_X.shape)
+print(norm_val_X.shape)
+print(norm_test_X.shape)
 
-#from sklearn.inspection import plot_partial_dependence
-# PD Plots
-#plot_partial_dependence(model, X, [feature_name])
+# NNN
+# Define the model architecture
+inputs = keras.Input(shape=(4,))
+x = layers.Dense(64, activation="relu")(inputs)
+x = layers.Dense(32, activation="relu")(x)
+x = layers.Dense(16, activation="relu")(x)
+
+output1 = layers.Dense(1, name="Density")(x)
+output2 = layers.Dense(1, name="cP")(x)
+
+model = keras.Model(inputs=inputs, outputs=[output1, output2])
+
+# Compile the model
+model.compile(
+    optimizer=keras.optimizers.Adam(),
+    loss={
+        "Density": "mean_squared_error",
+        "cP": "mean_squared_error"
+    },
+    metrics={
+        "Density": "mean_absolute_error",
+        "cP": "mean_absolute_error"
+    }
+)
+
+# Train the model
+history = model.fit(
+    x=norm_train_X,  # update the input parameter name to "x"
+    y=train_Y,  # update the output parameter name to "y"
+    batch_size=32,
+    epochs=100,
+    validation_data=(norm_val_X, val_Y)
+)
+
+# Evaluate the model on the test set
+model.evaluate(norm_test_X, test_Y)
 
 
+# Create PDP plots
+# create the PDP plots for input variables 'T', 'ALogP', 'ALogP2', and 'AMR' with respect to output variable 'Density'
+skl.partial_dependence(estimator=model, X=norm_test_X, features=[0, 1, 2, 3])
 
-
-
+# create the PDP plots for input variables 'T', 'ALogP', 'ALogP2', and 'AMR' with respect to output variable 'cP'
+skl.partial_dependence(estimator=model, X=norm_test_X, features=[0, 1, 2, 3])
