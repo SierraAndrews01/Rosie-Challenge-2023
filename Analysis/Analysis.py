@@ -10,7 +10,10 @@ import sklearn.inspection as skl
 import tensorflow as tf
 from tensorflow import keras
 from keras import layers
+from keras import wrappers
+from keras.wrappers.scikit_learn import KerasClassifier, KerasRegressor
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.inspection import partial_dependence
 from mpl_toolkits import mplot3d
 import matplotlib.pyplot as plt
 import pdpbox
@@ -33,7 +36,8 @@ finalDataDF = selectStaticVisc.join(selectStaticDen)
 finalDataDF = finalDataDF.dropna()
 finalDataDF = finalDataDF.reset_index()
 print(len(finalDataDF))
-print(finalDataDF)
+#print(finalDataDF)
+#print(finalDataDF.isna().any().any())
 
 # Helper functions
 def norm(x):
@@ -65,11 +69,11 @@ norm_val_X = np.array(norm(val))
 
 #Analysis
 #finalDataDF = finalDataDF.reset_index()
-#r2 = r2_score(finalDataDF['Density'], finalDataDF['cP'])
-#print(r2)
-
-##rmse = mean_squared_error(test_Y, train_Y, squared = False)
-##print(rmse)
+# r2 = r2_score(finalDataDF['Density'], finalDataDF['cP'])
+# print(r2)
+#
+# rmse = mean_squared_error(test_Y, train_Y, squared = False)
+# print(rmse)
 
 # print shape of input data
 print(norm_train_X.shape)
@@ -103,20 +107,18 @@ model.compile(
 
 # Train the model
 history = model.fit(
-    x=norm_train_X,  # update the input parameter name to "x"
-    y=train_Y,  # update the output parameter name to "y"
+    x=norm_train_X,
+    y=train_Y,
     batch_size=32,
     epochs=100,
     validation_data=(norm_val_X, val_Y)
 )
 
-# Evaluate the model on the test set
-model.evaluate(norm_test_X, test_Y)
-
-
 # Create PDP plots
 # create the PDP plots for input variables 'T', 'ALogP', 'ALogP2', and 'AMR' with respect to output variable 'Density'
+model = model.fit(norm_test_X, test_Y)
 skl.partial_dependence(estimator=model, X=norm_test_X, features=[0, 1, 2, 3])
 
 # create the PDP plots for input variables 'T', 'ALogP', 'ALogP2', and 'AMR' with respect to output variable 'cP'
+model = model.fit(norm_test_X, test_Y)
 skl.partial_dependence(estimator=model, X=norm_test_X, features=[0, 1, 2, 3])
