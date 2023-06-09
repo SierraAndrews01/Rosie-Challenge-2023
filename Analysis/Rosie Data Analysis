@@ -1,0 +1,22 @@
+VIF for train data set:
+  features       VIF
+0        T  3.352781
+1    ALogP  4.771971
+2   ALogP2  3.457842
+3      AMR  5.843069 
+
+RMSE and R-squared for training data set:
+    Variable   Density  Viscosity
+0       RMSE  0.051617   0.380378
+1  R-Squared  0.467721   0.676535 
+
+RMSE and R-squared for validation data set:
+    Variable   Density  Viscosity
+0       RMSE  0.054766   0.386108
+1  R-Squared  0.397330   0.604246 
+
+RMSE and R-squared for test data set:
+    Variable   Density  Viscosity
+0       RMSE  0.052702   0.386891
+1  R-Squared  0.408446   0.615715 
+
