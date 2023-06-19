@@ -13,6 +13,7 @@ from lime.lime_tabular import LimeTabularExplainer
 import lime
 import lime.lime_tabular
 import shap
+import h5py
 
 # Function to plot the data
 def plotdata(datax, datay, labelx, labely, limitx, limity, figurename):
@@ -39,8 +40,9 @@ def plotdata(datax, datay, labelx, labely, limitx, limity, figurename):
     if limity:
         ax.set_ylim(limity)
 
-    #plt.show()
-    fig.savefig(figurename, dpi=300, bbox_inches='tight')
+    plt.show()
+    #image_path = f'C:\\Users\\andrewss\\PycharmProjects\\Rosie-Challenge-2023\\Data PNGs\\{figurename}.png'
+    #fig.savefig(fname=image_path, dpi=300, bbox_inches='tight')
 
 
 # Function to calculate VIF for a dataset
@@ -76,7 +78,7 @@ def format_output(data):
     return [y1, y2]
 
 # Create file to write results to:
-file = open("Rosie Data Analysis", "w")
+file = open("Data PNGs/Rosie Data Analysis", "w")
 
 
 # Load the Excel file
@@ -148,6 +150,17 @@ history = model.fit(
     epochs=100,
     validation_data=(norm_val_X, val_Y)
 )
+
+# Save model to JSON file
+json_model = model.to_json()
+print("Model file successfully created")
+#save the model architecture to JSON file
+with open('Data PNGs/modelFile.json', 'w') as json_file:
+    json_file.write(json_model)
+print("Architecture saved")
+#saving the weights of the model
+model.save_weights('ModelWeights/modelFileWeights.h5py')
+print("Model weights saved")
 
 # Evaluate the model on the validation set
 loss, Y1_loss, Y2_loss, Y1_rmse, Y2_rmse = model.evaluate(x=norm_val_X, y=val_Y)
@@ -256,8 +269,8 @@ plt.ylabel("Loss")
 plt.xlabel("Epoch")
 plt.legend(["Train", "Test"], loc="upper left")
 plt.grid()
-#plt.show()
-
+plt.savefig("Data PNGs/ModelLoss")
+plt.show()
 
 ####################################### PARTIAL DEPENDENCY PLOTS ########################################
 # Function to create a model for a single output
@@ -282,7 +295,8 @@ def norm_with_columns(x):
 norm_train_X_df = norm_with_columns(train)
 
 # Function to plot PDP for a specific feature
-def plot_pdp(model, dataset, feature_name):
+
+def plot_pdp_density(model, dataset, feature_name):
     pdp_feature = pdp.pdp_isolate(
         model=model,
         dataset=dataset,
@@ -290,16 +304,30 @@ def plot_pdp(model, dataset, feature_name):
         feature=feature_name
     )
     pdp.pdp_plot(pdp_feature, feature_name)
-    #plt.show()
+    plt.savefig('Data PNGs/density' + feature_name)
+    plt.show()
+
+
+def plot_pdp_viscosity(model, dataset, feature_name):
+    pdp_feature = pdp.pdp_isolate(
+        model=model,
+        dataset=dataset,
+        model_features=feature_names,
+        feature=feature_name
+    )
+    pdp.pdp_plot(pdp_feature, feature_name)
+    plt.savefig('Data PNGs/viscosity' + feature_name)
+    plt.show()
+
 
 # Plot PDP for each feature in the dataset for density
 for feature in feature_names:
-    #plot_pdp(density_model, norm_train_X_df, feature)
+    plot_pdp_density(density_model, norm_train_X_df, feature)
     print()
 
 # Plot PDP for each feature in the dataset for viscosity
 for feature in feature_names:
-    #plot_pdp(viscosity_model, norm_train_X_df, feature)
+    plot_pdp_viscosity(viscosity_model, norm_train_X_df, feature)
     print()
 
 ####################################### LIME and SHAPLEY VALUES ########################################
@@ -338,8 +366,10 @@ cp_exp = cp_explainer.explain_instance(sample, lambda x: predict_fn(x, 1))
 
 # Plot the explanations
 den_plot = density_exp.as_pyplot_figure()
+plt.savefig("Data PNGs/densityLimeExplanation")
 plt.show()
 visc_plot = cp_exp.as_pyplot_figure()
+plt.savefig("Data PNGs/viscosityLimeExplanation")
 plt.show()
 
 # Generate Shapley values and plots
@@ -354,14 +384,16 @@ column_1 = df.iloc[:, 0]
 column_2 = df.iloc[:, 1]
 column_3 = df.iloc[:, 2]
 column_4 = df.iloc[:, 3]
-#arr = model.predict
-#print(arr.size)
+
 visc_explainer = shap.Explainer(viscosity_model, norm_val_X)
 visc_shap_values = visc_explainer(norm_val_X)
-shap.plots.bar(visc_shap_values)
-print("Success")
+viscFig = shap.plots.bar(visc_shap_values, show=False)
+plt.savefig("Data PNGs/viscosityShapleyValues")
+plt.show()
+
 den_explainer = shap.Explainer(density_model, norm_val_X)
 den_shap_values = den_explainer(norm_val_X)
-shap.plots.bar(den_shap_values)
-print("Success")
+denFig = shap.plots.bar(den_shap_values, show=False)
+plt.savefig("Data PNGs/densityShapleyValues")
+plt.show()
 

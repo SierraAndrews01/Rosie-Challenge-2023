@@ -7,16 +7,16 @@ VIF for train data set:
 
 RMSE and R-squared for training data set:
     Variable   Density  Viscosity
-0       RMSE  0.051617   0.380378
-1  R-Squared  0.467721   0.676535 
+0       RMSE  0.048005   0.381988
+1  R-Squared  0.539606   0.673791 
 
 RMSE and R-squared for validation data set:
     Variable   Density  Viscosity
-0       RMSE  0.054766   0.386108
-1  R-Squared  0.397330   0.604246 
+0       RMSE  0.051778   0.379993
+1  R-Squared  0.461304   0.616684 
 
 RMSE and R-squared for test data set:
     Variable   Density  Viscosity
-0       RMSE  0.052702   0.386891
-1  R-Squared  0.408446   0.615715 
+0       RMSE  0.050537   0.382946
+1  R-Squared  0.456045   0.623511 
 
