@@ -83,7 +83,7 @@ file = open("Data PNGs/Rosie Data Analysis", "w")
 
 
 # Load the Excel file
-xls = pd.ExcelFile('C:\\Users\\andrewss\\PycharmProjects\\Rosie-Challenge-2023\\Analysis\\API_ProjectAll_SI.xlsx')
+xls = pd.ExcelFile('API_ProjectAll_SI.xlsx')
 staticDenDataframe = pd.read_excel(xls, 'staticDen')
 staticViscDataframe = pd.read_excel(xls, 'staticVisc')
 
@@ -297,17 +297,6 @@ norm_train_X_df = norm_with_columns(train)
 
 # Function to plot PDP for a specific feature
 
-def plot_pdp_density(model, dataset, feature_name):
-    pdp_feature = pdp.pdp_isolate(
-        model=model,
-        dataset=dataset,
-        model_features=feature_names,
-        feature=feature_name
-    )
-    pdp.pdp_plot(pdp_feature, feature_name)
-    plt.savefig('Data PNGs/density' + feature_name)
-    plt.show()
-
 
 def plot_pdp_viscosity(model, dataset, feature_name):
     pdp_feature = pdp.pdp_isolate(
@@ -318,6 +307,40 @@ def plot_pdp_viscosity(model, dataset, feature_name):
     )
     pdp.pdp_plot(pdp_feature, feature_name)
     plt.savefig('Data PNGs/viscosity' + feature_name)
+    plt.show()
+
+"""
+def plot_pdp_density(model, dataset, feature_name):
+    pdp_feature = pdp.pdp_isolate(
+        model=model,
+        dataset=dataset,
+        model_features=feature_names,
+        feature=feature_name
+    )
+    pdp.pdp_plot(pdp_feature, feature_name)
+    plt.savefig('Data PNGs/density' + feature_name)
+    plt.show()
+"""
+
+def plot_pdp_density(model, dataset, feature_name):
+    num_classes = len(np.unique(model))
+    print(type(num_classes))
+    print(type(feature_name))
+    print(type(feature_names))
+    print(type(feature))
+    print(type(dataset))
+    print(type(density_pred))
+    pdp_feature = pdp.PDPIsolate(
+        model=model,
+        n_classes=num_classes,
+        df=dataset,
+        feature=feature_name,
+        model_features=feature_names,
+        feature_name=feature_name
+    )
+    print("Passed feature creation")
+    pdp.pdp_plot(pdp_feature, feature_name)
+    plt.savefig('Data PNGs/density' + feature_name)
     plt.show()
 
 
